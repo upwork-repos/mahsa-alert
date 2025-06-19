@@ -67,6 +67,10 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 				id: doc.id,
 				...doc.data(),
 			})) as Strike[];
+			console.log(
+				"ids",
+				data.map((d) => d.id),
+			);
 			setStrikeIds(data.map((d) => d.id));
 
 			dataEntries.map((dataEntry) => {
@@ -117,15 +121,45 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 			const newStrikes = updatedStrikes.filter(
 				(f) => !strikeIds.includes(f.id),
 			);
+			console.log({ newStrikes, strikeIds });
 			// create a push notification
-			if (newStrikes.length > 0) {
+			if (newStrikes.length > 0 && strikeIds.length !== 0) {
 				newStrikes.forEach((strike) => {
-					new Notification("New Strike Detected", {
-						body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
-						icon: "/favicon.ico",
-					});
+					alert(
+						`${strike.properties.siteTargeted} - ${strike.properties.status}`,
+					);
+
+					// Check if notifications are supported and permission is granted
+					if (
+						"Notification" in window &&
+						Notification.permission === "granted"
+					) {
+						new Notification("New Strike Detected", {
+							body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
+							icon: "/favicon.ico",
+						});
+					} else if (
+						"Notification" in window &&
+						Notification.permission === "default"
+					) {
+						// Request permission if not yet granted
+						Notification.requestPermission().then((permission) => {
+							if (permission === "granted") {
+								new Notification("New Strike Detected", {
+									body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
+									icon: "/favicon.ico",
+								});
+							}
+						});
+					}
 				});
 			}
+			console.log(
+				"ids",
+				updatedStrikes.map((d) => d.id),
+			);
+			setStrikeIds(updatedStrikes.map((d) => d.id));
+
 			setLayersData({
 				...layersData,
 				strikes: {

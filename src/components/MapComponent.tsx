@@ -574,7 +574,6 @@ const MapComponent: React.FC<MapComponentProps> = ({
 			});
 
 			map.current.on("load", () => {
-				console.log("jjjj");
 				setIsMapLoaded(true);
 			});
 			map.current.once("load", loadMap);
