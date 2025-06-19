@@ -1,6 +1,6 @@
 import { createContext, useContext, useRef } from "react";
+import { initialLayersData } from "./layers/layers.utils";
 import type { LayersData } from "./layers.context.types";
-import { initialLayersData } from "./layers.utils";
 
 export const LayersDataRefContext = createContext<
 	React.MutableRefObject<LayersData>

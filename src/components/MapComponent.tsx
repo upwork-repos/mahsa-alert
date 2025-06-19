@@ -546,12 +546,9 @@ const MapComponent: React.FC<MapComponentProps> = ({
 
 	// Initialize map
 	useEffect(() => {
-		console.log({ map, mapContainer });
 		if (map.current) return;
 		if (!mapContainer.current) return;
-		console.log({ isLayersDataLoaded, isBordersDataLoaded });
 		if (!isLayersDataLoaded || !isBordersDataLoaded) return;
-		console.log("hmm");
 
 		try {
 			map.current = new maplibregl.Map({

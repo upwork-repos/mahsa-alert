@@ -39,7 +39,8 @@ export const totalLayers: Layer[] = [
 		},
 		source: {
 			key: `${layerIds.strikes}-source`,
-			path: "/sources/strikes.geojson",
+			path: "",
+			// path: "/sources/strikes.geojson",
 		},
 		icon: {
 			key: "explosion-icon",
