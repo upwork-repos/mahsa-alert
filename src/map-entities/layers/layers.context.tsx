@@ -106,6 +106,7 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 		fetchLayersData();
 	}, [layers]);
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: we only want to know if there is a new strike
 	useEffect(() => {
 		const unsubscribe = onSnapshot(collection(db, "strikes"), (snapshot) => {
 			const updatedStrikes = snapshot.docs.map((doc) => ({
@@ -154,7 +155,7 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 		});
 
 		return () => unsubscribe(); // clean up on unmount
-	}, [strikeIds, layersData]);
+	}, []);
 
 	const toggleLayerVisibility = useCallback(
 		(layerId: keyof typeof layerIds, visible: boolean) => {
