@@ -65,17 +65,19 @@ function RouteComponent() {
 										{date.toLocaleDateString()} {date.toLocaleTimeString()}
 									</td>
 									<td className="p-4">
-										<div className="font-medium">{token.browser.platform}</div>
+										<div className="font-medium">
+											{token.browser?.platform ?? token.device?.platform}
+										</div>
 										<div className="text-xs text-gray-500">
-											{token.browser.vendor}
+											{token.browser?.vendor ?? token.device?.version}
 										</div>
 									</td>
 									<td className="p-4">
 										<div className="max-w-md overflow-hidden text-ellipsis">
-											{token.browser.userAgent}
+											{token.browser?.userAgent}
 										</div>
 									</td>
-									<td className="p-4">{token.browser.language}</td>
+									<td className="p-4">{token.browser?.language}</td>
 									<td className="p-4">
 										<div className="font-mono text-xs">{tokenPreview}</div>
 									</td>

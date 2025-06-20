@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { useId, useState } from "react";
 import { db } from "@/firebase";
 import type { Strike } from "@/types/schema";
@@ -54,7 +54,7 @@ function RouteComponent() {
 					threatLevel:
 						formData.threatLevel as Strike["properties"]["threatLevel"],
 				},
-				createdAt: new Date(),
+				createdAt: serverTimestamp(),
 			};
 
 			await addDoc(collection(db, "strikes"), strikeData).then(() => {

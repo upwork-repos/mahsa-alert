@@ -1,3 +1,5 @@
+import type { FieldValue } from "firebase/firestore";
+
 export type Strike = {
 	id: string;
 	type: "Feature";
@@ -11,7 +13,7 @@ export type Strike = {
 		status: string;
 		threatLevel: "low" | "medium" | "high" | "critical";
 	};
-	createdAt: Date;
+	createdAt: FieldValue;
 };
 
 export type TokenInfo = {
@@ -21,10 +23,14 @@ export type TokenInfo = {
 		seconds: number;
 		nanoseconds: number;
 	};
-	browser: {
-		userAgent: string;
-		platform: string;
-		language: string;
-		vendor: string;
+	device?: {
+		platform?: string;
+		version?: string;
+	};
+	browser?: {
+		userAgent?: string;
+		platform?: string;
+		language?: string;
+		vendor?: string;
 	};
 };
