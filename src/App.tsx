@@ -3,12 +3,14 @@ import { onMessage } from "firebase/messaging";
 import { useCallback, useEffect, useState } from "react";
 import { db } from "@/firebase";
 import EvacSlider from "./components/EvacSlider";
+import { GlobalNotificationManager } from "./components/GlobalNotificationManager";
 import Header from "./components/Header";
 import LayerFilter from "./components/LayerFilter";
 import Layout from "./components/Layout";
 import LocateButton from "./components/LocateButton";
 import LocationTooltip from "./components/LocationTooltip";
 import MapComponent from "./components/MapComponent";
+import { useNotification } from "./components/NotificationContext";
 import { NotificationManager } from "./components/NotificationManager";
 import { NotificationPermission } from "./components/NotificationPermission";
 import { OfflineIndicator } from "./components/OfflineIndicator";
@@ -44,6 +46,7 @@ function App() {
 	const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
 	const [zoomToBounds, setZoomToBounds] = useState<ZoomToBounds | null>(null);
 	const [notifications, setNotifications] = useState<Notification[]>([]);
+	const { showNotification } = useNotification();
 
 	useEffect(() => {
 		// Register Firebase messaging service worker first
@@ -134,9 +137,15 @@ function App() {
 		console.log("Notification.permission", Notification.permission);
 		if (Notification.permission === "granted") {
 			console.log("Permission granted");
-			alert(
-				"This is a test notification to demonstrate the push notification system",
-			);
+			// Show custom alert dialog
+			showNotification({
+				title: "New Strike Detected",
+				message:
+					"This is a test notification to demonstrate the push notification system. A new strike has been detected in your area.",
+				type: "warning",
+			});
+
+			// Also show the native browser notification
 			new Notification("New Strike Detected", {
 				body: "This is a test notification to demonstrate the push notification system.",
 				icon: "/favicon.ico",
@@ -146,9 +155,15 @@ function App() {
 			Notification.requestPermission().then((permission) => {
 				console.log("re permission", permission);
 				if (permission === "granted") {
-					alert(
-						"This is a test notification to demonstrate the push notification system",
-					);
+					// Show custom alert dialog
+					showNotification({
+						title: "New Strike Detected",
+						message:
+							"This is a test notification to demonstrate the push notification system. A new strike has been detected in your area.",
+						type: "warning",
+					});
+
+					// Also show the native browser notification
 					new Notification("New Strike Detected", {
 						body: "This is a test notification to demonstrate the push notification system.",
 						icon: "/favicon.ico",
@@ -156,7 +171,7 @@ function App() {
 				}
 			});
 		}
-	}, []);
+	}, [showNotification]);
 
 	const handleLocationHover = useCallback(
 		(location: LocationProperties | null, mouseEvent?: MouseEvent) => {
@@ -247,6 +262,9 @@ function App() {
 							<NotificationPermission
 								onPermissionGranted={handleNotificationPermissionGranted}
 							/>
+
+							{/* Global Notification Manager */}
+							<GlobalNotificationManager />
 						</BordersProvider>
 					</LayersProvider>
 				</UserLocationProvider>

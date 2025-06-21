@@ -16,8 +16,9 @@ import {
 	useRef,
 	useState,
 } from "react";
-import { db } from "@/firebase";
 import type { Strike } from "@/types/schema";
+import { db } from "../../firebase";
+import { showGlobalNotification } from "../../utils/notifications";
 import { type Layer, type layerIds, totalLayers } from "./layers";
 import { LayersDataRefProvider } from "./layers.context.ref";
 import type { LayersData } from "./layers.context.types";
@@ -139,10 +140,6 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 			// create a push notification
 			if (newStrikes.length > 0) {
 				newStrikes.forEach(async (strike) => {
-					// alert(
-					// 	`${strike.properties.siteTargeted} - ${strike.properties.status}`,
-					// );
-
 					// Check if notifications are supported and permission is granted
 					console.log("Notification in window", "Notification" in window);
 					console.log("Notification permission", Notification.permission);
@@ -156,9 +153,13 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 							icon: "/favicon.ico",
 						});
 
-						alert(
-							`${strike.properties.siteTargeted} - ${strike.properties.status}`,
-						);
+						// Show custom notification dialog
+						showGlobalNotification({
+							title: "New Strike Detected",
+							message: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
+							type: "warning",
+						});
+
 						new Notification("New Strike Detected", {
 							body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
 							icon: "/favicon.ico",
@@ -171,9 +172,13 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 						Notification.requestPermission().then((permission) => {
 							console.log("permissionX", permission);
 							if (permission === "granted") {
-								alert(
-									`${strike.properties.siteTargeted} - ${strike.properties.status}`,
-								);
+								// Show custom notification dialog
+								showGlobalNotification({
+									title: "New Strike Detected",
+									message: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
+									type: "warning",
+								});
+
 								new Notification("New Strike Detected", {
 									body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
 									icon: "/favicon.ico",

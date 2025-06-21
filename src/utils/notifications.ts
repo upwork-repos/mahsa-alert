@@ -3,6 +3,40 @@ import { registerFirebaseMessagingSW } from "./serviceWorker";
 
 const VAPID_KEY = import.meta.env.VITE_VAPID_KEY;
 
+// Global notification function that can be called from anywhere
+let globalShowNotification:
+	| ((notification: {
+			title: string;
+			message: string;
+			type?: "warning" | "info" | "error";
+			onConfirm?: () => void;
+			confirmText?: string;
+			cancelText?: string;
+	  }) => void)
+	| null = null;
+
+export const setGlobalNotificationHandler = (
+	handler: typeof globalShowNotification,
+) => {
+	globalShowNotification = handler;
+};
+
+export const showGlobalNotification = (notification: {
+	title: string;
+	message: string;
+	type?: "warning" | "info" | "error";
+	onConfirm?: () => void;
+	confirmText?: string;
+	cancelText?: string;
+}) => {
+	if (globalShowNotification) {
+		globalShowNotification(notification);
+	} else {
+		// Fallback to browser alert if global handler is not set
+		alert(`${notification.title}\n\n${notification.message}`);
+	}
+};
+
 export const requestNotificationPermission = async () => {
 	try {
 		// First, register the Firebase messaging service worker
@@ -28,12 +62,15 @@ export const requestNotificationPermission = async () => {
 	}
 };
 
+// Note: This function now requires the notification context to be available
+// It should be called from within a component that has access to useNotification
 export const showLocalNotification = (
 	title: string,
 	options?: NotificationOptions,
 ) => {
 	if (Notification.permission === "granted") {
-		alert(options?.body);
+		// Instead of alert, we'll return the notification object
+		// The calling component should use the global notification system
 		return new Notification(title, {
 			icon: "/assets/img/icon-192x192.png",
 			badge: "/assets/img/icon-192x192.png",
