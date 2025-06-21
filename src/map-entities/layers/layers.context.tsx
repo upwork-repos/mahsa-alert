@@ -141,7 +141,11 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 							body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
 							icon: "/favicon.ico",
 						});
-						await new Notification("New Strike Detected", {
+
+						alert(
+							`${strike.properties.siteTargeted} - ${strike.properties.status}`,
+						);
+						new Notification("New Strike Detected", {
 							body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
 							icon: "/favicon.ico",
 						});
@@ -153,6 +157,9 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 						Notification.requestPermission().then((permission) => {
 							console.log("permissionX", permission);
 							if (permission === "granted") {
+								alert(
+									`${strike.properties.siteTargeted} - ${strike.properties.status}`,
+								);
 								new Notification("New Strike Detected", {
 									body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
 									icon: "/favicon.ico",

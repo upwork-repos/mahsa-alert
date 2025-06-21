@@ -114,15 +114,24 @@ function App() {
 			return;
 		}
 		// check if permission is granted
+		console.log("Notification.permission", Notification.permission);
 		if (Notification.permission === "granted") {
+			console.log("Permission granted");
+			alert(
+				"This is a test notification to demonstrate the push notification system",
+			);
 			new Notification("New Strike Detected", {
 				body: "This is a test notification to demonstrate the push notification system.",
 				icon: "/favicon.ico",
 			});
 		} else {
+			console.log("Permission not granted");
 			Notification.requestPermission().then((permission) => {
-				console.log("permission", permission);
+				console.log("re permission", permission);
 				if (permission === "granted") {
+					alert(
+						"This is a test notification to demonstrate the push notification system",
+					);
 					new Notification("New Strike Detected", {
 						body: "This is a test notification to demonstrate the push notification system.",
 						icon: "/favicon.ico",

@@ -24,6 +24,7 @@ export const showLocalNotification = (
 	options?: NotificationOptions,
 ) => {
 	if (Notification.permission === "granted") {
+		alert(options?.body);
 		return new Notification(title, {
 			icon: "/assets/img/icon-192x192.png",
 			badge: "/assets/img/icon-192x192.png",
