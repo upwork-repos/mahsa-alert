@@ -108,15 +108,28 @@ function App() {
 	}, []);
 
 	const testNotification = useCallback(() => {
-		const testNotification: Notification = {
-			id: Date.now().toString(),
-			title: "Test Alert",
-			body: "This is a test notification to demonstrate the push notification system.",
-			onClick: () => {
-				console.log("Test notification clicked");
-			},
-		};
-		setNotifications((prev) => [...prev, testNotification]);
+		// check if notification is supported
+		if (!("Notification" in window)) {
+			console.log("Notification API not supported");
+			return;
+		}
+		// check if permission is granted
+		if (Notification.permission === "granted") {
+			new Notification("New Strike Detected", {
+				body: "This is a test notification to demonstrate the push notification system.",
+				icon: "/favicon.ico",
+			});
+		} else {
+			Notification.requestPermission().then((permission) => {
+				console.log("permission", permission);
+				if (permission === "granted") {
+					new Notification("New Strike Detected", {
+						body: "This is a test notification to demonstrate the push notification system.",
+						icon: "/favicon.ico",
+					});
+				}
+			});
+		}
 	}, []);
 
 	const handleLocationHover = useCallback(

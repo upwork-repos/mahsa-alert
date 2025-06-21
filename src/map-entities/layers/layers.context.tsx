@@ -123,18 +123,25 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 			);
 			console.log({ newStrikes, strikeIds });
 			// create a push notification
-			if (newStrikes.length > 0 && strikeIds.length !== 0) {
-				newStrikes.forEach((strike) => {
-					alert(
-						`${strike.properties.siteTargeted} - ${strike.properties.status}`,
-					);
+			if (newStrikes.length > 0) {
+				newStrikes.forEach(async (strike) => {
+					// alert(
+					// 	`${strike.properties.siteTargeted} - ${strike.properties.status}`,
+					// );
 
 					// Check if notifications are supported and permission is granted
+					console.log("Notification in window", "Notification" in window);
+					console.log("Notification permission", Notification.permission);
 					if (
 						"Notification" in window &&
 						Notification.permission === "granted"
 					) {
-						new Notification("New Strike Detected", {
+						console.log("new strike detected");
+						console.log("xyz", {
+							body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
+							icon: "/favicon.ico",
+						});
+						await new Notification("New Strike Detected", {
 							body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
 							icon: "/favicon.ico",
 						});
@@ -144,6 +151,7 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 					) {
 						// Request permission if not yet granted
 						Notification.requestPermission().then((permission) => {
+							console.log("permissionX", permission);
 							if (permission === "granted") {
 								new Notification("New Strike Detected", {
 									body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
