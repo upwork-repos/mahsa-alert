@@ -9,6 +9,8 @@ import Layout from "./components/Layout";
 import LocateButton from "./components/LocateButton";
 import LocationTooltip from "./components/LocationTooltip";
 import MapComponent from "./components/MapComponent";
+import { NotificationManager } from "./components/NotificationManager";
+import { NotificationPermission } from "./components/NotificationPermission";
 import { OfflineIndicator } from "./components/OfflineIndicator";
 import ProximityAlert from "./components/ProximityAlert";
 import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
@@ -28,16 +30,24 @@ interface TooltipState {
 	y: number;
 }
 
+interface Notification {
+	id: string;
+	title: string;
+	body?: string;
+	onClick?: () => void;
+}
+
 type ZoomToBounds = [[number, number], [number, number]];
 
 function App() {
 	const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
 	const [zoomToBounds, setZoomToBounds] = useState<ZoomToBounds | null>(null);
+	const [notifications, setNotifications] = useState<Notification[]>([]);
 
 	useEffect(() => {
 		requestNotificationPermission().then(async (token) => {
 			if (!token) return;
-			console.log("is this the token", token);
+			console.log("Notification token:", token);
 			await setDoc(doc(db, "tokens", token), {
 				token,
 				createdAt: new Date(),
@@ -52,8 +62,61 @@ function App() {
 
 		onMessage(messaging, (payload) => {
 			console.log("Message received in foreground:", payload);
-			alert(payload.notification?.title);
+
+			const notification: Notification = {
+				id: Date.now().toString(),
+				title: payload.notification?.title || "New Alert",
+				body: payload.notification?.body,
+				onClick: () => {
+					// Handle notification click - could navigate to specific area or show details
+					console.log("Notification clicked:", payload);
+				},
+			};
+
+			setNotifications((prev) => [...prev, notification]);
 		});
+	}, []);
+
+	const removeNotification = useCallback((id: string) => {
+		setNotifications((prev) =>
+			prev.filter((notification) => notification.id !== id),
+		);
+	}, []);
+
+	const handleNotificationPermissionGranted = useCallback(async () => {
+		try {
+			const token = await requestNotificationPermission();
+			if (token) {
+				console.log("Notification permission granted, token:", token);
+				await setDoc(doc(db, "tokens", token), {
+					token,
+					createdAt: new Date(),
+					browser: {
+						userAgent: navigator.userAgent,
+						platform: navigator.platform,
+						language: navigator.language,
+						vendor: navigator.vendor,
+					},
+				});
+			}
+		} catch (error) {
+			console.error(
+				"Error setting up notifications after permission granted:",
+				error,
+			);
+		}
+	}, []);
+
+	const testNotification = useCallback(() => {
+		const testNotification: Notification = {
+			id: Date.now().toString(),
+			title: "Test Alert",
+			body: "This is a test notification to demonstrate the push notification system.",
+			onClick: () => {
+				console.log("Test notification clicked");
+			},
+		};
+		setNotifications((prev) => [...prev, testNotification]);
 	}, []);
 
 	const handleLocationHover = useCallback(
@@ -98,7 +161,7 @@ function App() {
 	return (
 		<ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
 			<Layout>
-				<Header>
+				<Header onTestNotification={testNotification}>
 					<ThemeToggle className="ml-auto" />
 				</Header>
 
@@ -134,6 +197,17 @@ function App() {
 							<OfflineIndicator />
 							<PWAUpdatePrompt />
 							<PWAInstallPrompt />
+
+							{/* Push Notifications */}
+							<NotificationManager
+								notifications={notifications}
+								onRemoveNotification={removeNotification}
+							/>
+
+							{/* Notification Permission Prompt */}
+							<NotificationPermission
+								onPermissionGranted={handleNotificationPermissionGranted}
+							/>
 						</BordersProvider>
 					</LayersProvider>
 				</UserLocationProvider>

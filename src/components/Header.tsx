@@ -1,7 +1,13 @@
+import { Bell } from "lucide-react";
 import type React from "react";
 import type { ReactNode } from "react";
 
-const Header: React.FC<{ children: ReactNode }> = ({ children }) => {
+interface HeaderProps {
+	children: ReactNode;
+	onTestNotification?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ children, onTestNotification }) => {
 	return (
 		<div className="fixed top-4 md:top-8 left-1/2 transform -translate-x-1/2 z-40 w-full max-w-sm md:max-w-lg">
 			<div className="flex items-center w-full bg-black/80 backdrop-blur-md rounded-xl md:rounded-2xl px-4 py-3 md:px-3 md:py-4 text-white border border-gray-600 hover:bg-black/90 transition-colors">
@@ -16,6 +22,17 @@ const Header: React.FC<{ children: ReactNode }> = ({ children }) => {
 				</h1>
 
 				{children}
+
+				{onTestNotification && (
+					<button
+						type="button"
+						onClick={onTestNotification}
+						className="ml-2 p-2 text-white hover:text-blue-300 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-black/80 rounded-lg"
+						title="Test Notification"
+					>
+						<Bell size={20} />
+					</button>
+				)}
 			</div>
 		</div>
 	);
