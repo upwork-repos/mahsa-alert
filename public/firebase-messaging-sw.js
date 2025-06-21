@@ -5,7 +5,7 @@ importScripts(
 	"https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js",
 );
 
-// Firebase configuration
+// Firebase configuration - using the same config as the main app
 const firebaseConfig = {
 	apiKey: "AIzaSyB0q6Y0WtN7rIR5Zoau-7qghjRKL6k3Sfg",
 	authDomain: "alert-1af29.firebaseapp.com",

@@ -1,9 +1,17 @@
 import { getToken, messaging } from "../firebase";
+import { registerFirebaseMessagingSW } from "./serviceWorker";
 
 const VAPID_KEY = import.meta.env.VITE_VAPID_KEY;
 
 export const requestNotificationPermission = async () => {
 	try {
+		// First, register the Firebase messaging service worker
+		const swRegistration = await registerFirebaseMessagingSW();
+		if (!swRegistration) {
+			console.error("Failed to register Firebase messaging service worker");
+			return null;
+		}
+
 		const permission = await Notification.requestPermission();
 
 		if (permission !== "granted") {
@@ -12,6 +20,7 @@ export const requestNotificationPermission = async () => {
 		}
 
 		const token = await getToken(messaging, { vapidKey: VAPID_KEY });
+		console.log("Firebase messaging token obtained:", token);
 		return token;
 	} catch (error) {
 		console.error("Error requesting notification permission:", error);

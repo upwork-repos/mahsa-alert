@@ -23,6 +23,7 @@ import { UserLocationProvider } from "./map-entities/user-location/user-location
 import type { LocationProperties } from "./types";
 import { ThemeProvider } from "./ui/theme-provider";
 import { requestNotificationPermission } from "./utils/notifications";
+import { registerFirebaseMessagingSW } from "./utils/serviceWorker";
 
 interface TooltipState {
 	location: LocationProperties;
@@ -45,8 +46,17 @@ function App() {
 	const [notifications, setNotifications] = useState<Notification[]>([]);
 
 	useEffect(() => {
-		requestNotificationPermission().then(async (token) => {
+		// Register Firebase messaging service worker first
+		registerFirebaseMessagingSW().then(async (swRegistration) => {
+			if (!swRegistration) {
+				console.error("Failed to register Firebase messaging service worker");
+				return;
+			}
+
+			// Then request notification permission and get token
+			const token = await requestNotificationPermission();
 			if (!token) return;
+
 			console.log("Notification token:", token);
 			await setDoc(doc(db, "tokens", token), {
 				token,
@@ -85,6 +95,13 @@ function App() {
 
 	const handleNotificationPermissionGranted = useCallback(async () => {
 		try {
+			// Register Firebase messaging service worker first
+			const swRegistration = await registerFirebaseMessagingSW();
+			if (!swRegistration) {
+				console.error("Failed to register Firebase messaging service worker");
+				return;
+			}
+
 			const token = await requestNotificationPermission();
 			if (token) {
 				console.log("Notification permission granted, token:", token);
