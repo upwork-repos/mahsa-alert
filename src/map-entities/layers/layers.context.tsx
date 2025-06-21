@@ -63,6 +63,7 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 				}),
 			);
 			const snapshot = await getDocs(collection(db, "strikes"));
+
 			const data = snapshot.docs.map((doc) => ({
 				id: doc.id,
 				...doc.data(),
@@ -124,7 +125,7 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 			console.log({ newStrikes, strikeIds });
 			// create a push notification
 			if (newStrikes.length > 0) {
-				newStrikes.forEach(async (strike) => {
+				[newStrikes[0]].forEach(async (strike) => {
 					// alert(
 					// 	`${strike.properties.siteTargeted} - ${strike.properties.status}`,
 					// );
