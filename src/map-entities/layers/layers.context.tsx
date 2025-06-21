@@ -1,4 +1,11 @@
-import { collection, getDocs, onSnapshot } from "firebase/firestore";
+import {
+	collection,
+	getDocs,
+	limit,
+	onSnapshot,
+	orderBy,
+	query,
+} from "firebase/firestore";
 import {
 	createContext,
 	type Dispatch,
@@ -36,6 +43,12 @@ const LayersContext = createContext<LayersContextType>({
 	setLayersData: () => {},
 	isLayersDataLoaded: false,
 });
+
+const strikesQuery = query(
+	collection(db, "strikes"),
+	orderBy("createdAt", "desc"), // or "asc" for oldest first
+	limit(1),
+);
 
 export const useLayers = (): LayersContextType => useContext(LayersContext);
 
@@ -113,7 +126,7 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: we only want to know if there is a new strike
 	useEffect(() => {
-		const unsubscribe = onSnapshot(collection(db, "strikes"), (snapshot) => {
+		const unsubscribe = onSnapshot(strikesQuery, (snapshot) => {
 			const updatedStrikes = snapshot.docs.map((doc) => ({
 				id: doc.id,
 				...doc.data(),
@@ -125,7 +138,7 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 			console.log({ newStrikes, strikeIds });
 			// create a push notification
 			if (newStrikes.length > 0) {
-				[newStrikes[0]].forEach(async (strike) => {
+				newStrikes.forEach(async (strike) => {
 					// alert(
 					// 	`${strike.properties.siteTargeted} - ${strike.properties.status}`,
 					// );
