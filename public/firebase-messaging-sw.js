@@ -7,12 +7,12 @@ importScripts(
 
 // Firebase configuration
 const firebaseConfig = {
-	apiKey: "AIzaSyBXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
-	authDomain: "mahsa-alert.firebaseapp.com",
-	projectId: "mahsa-alert",
-	storageBucket: "mahsa-alert.appspot.com",
-	messagingSenderId: "123456789012",
-	appId: "1:123456789012:web:abcdefghijklmnop",
+	apiKey: "AIzaSyB0q6Y0WtN7rIR5Zoau-7qghjRKL6k3Sfg",
+	authDomain: "alert-1af29.firebaseapp.com",
+	projectId: "alert-1af29",
+	storageBucket: "alert-1af29.firebasestorage.app",
+	messagingSenderId: "729990985266",
+	appId: "1:729990985266:web:0a1d98102caefd4c406e2b",
 };
 
 // Initialize Firebase
