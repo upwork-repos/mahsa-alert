@@ -16,11 +16,6 @@ export function NotificationManager({
 	notifications,
 	onRemoveNotification,
 }: NotificationManagerProps) {
-	console.log("NotificationManager rendering:", {
-		notificationsCount: notifications.length,
-		notifications,
-	});
-
 	return (
 		<div className="fixed top-4 right-4 z-[9999] space-y-2">
 			{notifications.map((notification, index) => (
