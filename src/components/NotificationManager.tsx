@@ -16,13 +16,19 @@ export function NotificationManager({
 	notifications,
 	onRemoveNotification,
 }: NotificationManagerProps) {
+	console.log("NotificationManager rendering:", {
+		notificationsCount: notifications.length,
+		notifications,
+	});
+
 	return (
 		<div className="fixed top-4 right-4 z-[9999] space-y-2">
 			{notifications.map((notification, index) => (
 				<div
 					key={notification.id}
+					className="transform transition-all duration-300"
 					style={{
-						transform: `translateY(${index * 80}px)`,
+						transform: `translateY(${index * 90}px)`,
 					}}
 				>
 					<NotificationToast

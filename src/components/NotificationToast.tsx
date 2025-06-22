@@ -16,6 +16,8 @@ export function NotificationToast({
 }: NotificationToastProps) {
 	const [isVisible, setIsVisible] = useState(true);
 
+	console.log("NotificationToast rendering:", { title, body, isVisible });
+
 	useEffect(() => {
 		const timer = setTimeout(() => {
 			setIsVisible(false);
@@ -46,13 +48,13 @@ export function NotificationToast({
 
 	return (
 		<div
-			className={`fixed top-4 right-4 z-[9999] max-w-sm w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg transform transition-all duration-300 ${
-				isVisible ? "translate-x-0 opacity-100" : "translate-x-full opacity-0"
+			className={`relative max-w-sm w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg ${
+				isVisible ? "opacity-100" : "opacity-0"
 			}`}
 		>
 			{onClick ? (
-				<button
-					type="button"
+				// biome-ignore lint/a11y/noStaticElementInteractions: <explanation>
+				<div
 					onClick={handleClick}
 					onKeyDown={handleKeyDown}
 					className="w-full p-4 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-inset"
@@ -79,7 +81,7 @@ export function NotificationToast({
 							<X size={16} />
 						</button>
 					</div>
-				</button>
+				</div>
 			) : (
 				<div className="p-4">
 					<div className="flex items-start justify-between">
