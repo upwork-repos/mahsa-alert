@@ -169,6 +169,7 @@ function App() {
 		}
 	}, []);
 
+	// Test notification function
 	const testNotification = useCallback(() => {
 		console.log("=== Testing notification ===");
 
@@ -225,11 +226,18 @@ function App() {
 				type: "warning",
 			});
 
-			// Also show the native browser notification
-			new Notification("New Strike Detected", {
-				body: "This is a test notification to demonstrate the push notification system.",
-				icon: "/favicon.ico",
-			});
+			// Use service worker to show notification instead of direct Notification constructor
+			if ("serviceWorker" in navigator) {
+				navigator.serviceWorker.ready.then((registration) => {
+					registration.showNotification("New Strike Detected", {
+						body: "This is a test notification to demonstrate the push notification system.",
+						icon: "/favicon.ico",
+						badge: "/favicon.ico",
+						tag: "mahsa-alert-test-notification",
+						requireInteraction: true,
+					});
+				});
+			}
 		} else {
 			console.log("Permission not granted");
 			Notification.requestPermission().then((permission) => {
@@ -243,11 +251,18 @@ function App() {
 						type: "warning",
 					});
 
-					// Also show the native browser notification
-					new Notification("New Strike Detected", {
-						body: "This is a test notification to demonstrate the push notification system.",
-						icon: "/favicon.ico",
-					});
+					// Use service worker to show notification instead of direct Notification constructor
+					if ("serviceWorker" in navigator) {
+						navigator.serviceWorker.ready.then((registration) => {
+							registration.showNotification("New Strike Detected", {
+								body: "This is a test notification to demonstrate the push notification system.",
+								icon: "/favicon.ico",
+								badge: "/favicon.ico",
+								tag: "mahsa-alert-test-notification",
+								requireInteraction: true,
+							});
+						});
+					}
 				}
 			});
 		}
@@ -301,17 +316,29 @@ function App() {
 
 		// 5. Test local notification
 		console.log("5. Local Notification Test:");
-		if (Notification.permission === "granted") {
+		if (Notification.permission === "granted" && "serviceWorker" in navigator) {
 			try {
-				const notification = new Notification("Test Notification", {
-					body: "This is a test of local notifications",
-					icon: "/favicon.ico",
-				});
+				const registration = await navigator.serviceWorker.ready;
+				const notification = await registration.showNotification(
+					"Test Notification",
+					{
+						body: "This is a test of local notifications",
+						icon: "/favicon.ico",
+						badge: "/favicon.ico",
+						tag: "mahsa-alert-test-notification",
+					},
+				);
 				console.log("  - Local notification created successfully");
 
 				// Auto-close after 3 seconds
 				setTimeout(() => {
-					notification.close();
+					registration.getNotifications().then((notifications) => {
+						notifications.forEach((n) => {
+							if (n.tag === "mahsa-alert-test-notification") {
+								n.close();
+							}
+						});
+					});
 				}, 3000);
 			} catch (error) {
 				console.error("  - Local notification error:", error);

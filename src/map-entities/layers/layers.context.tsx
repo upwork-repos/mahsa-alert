@@ -160,10 +160,18 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 							type: "warning",
 						});
 
-						new Notification("New Strike Detected", {
-							body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
-							icon: "/favicon.ico",
-						});
+						// Use service worker to show notification instead of direct Notification constructor
+						if ("serviceWorker" in navigator) {
+							navigator.serviceWorker.ready.then((registration) => {
+								registration.showNotification("New Strike Detected", {
+									body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
+									icon: "/favicon.ico",
+									badge: "/favicon.ico",
+									tag: "mahsa-alert-strike-notification",
+									requireInteraction: true,
+								});
+							});
+						}
 					} else if (
 						"Notification" in window &&
 						Notification.permission === "default"
@@ -179,10 +187,18 @@ export const LayersProvider = ({ children }: { children: React.ReactNode }) => {
 									type: "warning",
 								});
 
-								new Notification("New Strike Detected", {
-									body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
-									icon: "/favicon.ico",
-								});
+								// Use service worker to show notification instead of direct Notification constructor
+								if ("serviceWorker" in navigator) {
+									navigator.serviceWorker.ready.then((registration) => {
+										registration.showNotification("New Strike Detected", {
+											body: `${strike.properties.siteTargeted} - ${strike.properties.status}`,
+											icon: "/favicon.ico",
+											badge: "/favicon.ico",
+											tag: "mahsa-alert-strike-notification",
+											requireInteraction: true,
+										});
+									});
+								}
 							}
 						});
 					}

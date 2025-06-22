@@ -135,25 +135,36 @@ if (Notification.permission === "granted") {
 
 // Test 6: Test Local Notification
 console.log("6. Local Notification Test:");
-if (Notification.permission === "granted") {
+if (Notification.permission === "granted" && "serviceWorker" in navigator) {
 	try {
-		const notification = new Notification("Firebase Test", {
-			body: "This is a test notification from Firebase test script",
-			icon: "/favicon.ico",
-			tag: "firebase-test",
-		});
-		console.log("  ✓ Local notification created successfully");
+		navigator.serviceWorker.ready.then((registration) => {
+			registration.showNotification("Firebase Test", {
+				body: "This is a test notification from Firebase test script",
+				icon: "/favicon.ico",
+				badge: "/favicon.ico",
+				tag: "firebase-test",
+			});
+			console.log("  ✓ Local notification created successfully");
 
-		// Auto-close after 3 seconds
-		setTimeout(() => {
-			notification.close();
-			console.log("  ✓ Test notification closed");
-		}, 3000);
+			// Auto-close after 3 seconds
+			setTimeout(() => {
+				registration.getNotifications().then((notifications) => {
+					notifications.forEach((n) => {
+						if (n.tag === "firebase-test") {
+							n.close();
+						}
+					});
+				});
+				console.log("  ✓ Test notification closed");
+			}, 3000);
+		});
 	} catch (error) {
 		console.error("  ✗ Local notification failed:", error);
 	}
 } else {
-	console.log("  ⚠ Cannot test local notifications - permission not granted");
+	console.log(
+		"  ⚠ Cannot test local notifications - permission not granted or service worker not available",
+	);
 }
 
 console.log("=== Test Complete ===");

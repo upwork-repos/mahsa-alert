@@ -15,25 +15,36 @@ console.log("  Current permission:", Notification.permission);
 
 // Test 3: Test local notification
 console.log("3. Local Notification Test:");
-if (Notification.permission === "granted") {
+if (Notification.permission === "granted" && "serviceWorker" in navigator) {
 	try {
-		const notification = new Notification("Test Notification", {
-			body: "This is a test notification from the console",
-			icon: "/favicon.ico",
-			tag: "console-test",
-		});
-		console.log("  ✓ Local notification created successfully");
+		navigator.serviceWorker.ready.then((registration) => {
+			registration.showNotification("Test Notification", {
+				body: "This is a test notification from the console",
+				icon: "/favicon.ico",
+				badge: "/favicon.ico",
+				tag: "console-test",
+			});
+			console.log("  ✓ Local notification created successfully");
 
-		// Auto-close after 5 seconds
-		setTimeout(() => {
-			notification.close();
-			console.log("  ✓ Notification auto-closed");
-		}, 5000);
+			// Auto-close after 5 seconds
+			setTimeout(() => {
+				registration.getNotifications().then((notifications) => {
+					notifications.forEach((n) => {
+						if (n.tag === "console-test") {
+							n.close();
+						}
+					});
+				});
+				console.log("  ✓ Notification auto-closed");
+			}, 5000);
+		});
 	} catch (error) {
 		console.error("  ✗ Local notification failed:", error);
 	}
 } else {
-	console.log("  ⚠ Permission not granted, cannot test local notifications");
+	console.log(
+		"  ⚠ Permission not granted or service worker not available, cannot test local notifications",
+	);
 }
 
 // Test 4: Check service workers

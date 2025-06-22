@@ -92,18 +92,23 @@ export const requestNotificationPermission = async () => {
 
 // Note: This function now requires the notification context to be available
 // It should be called from within a component that has access to useNotification
-export const showLocalNotification = (
+export const showLocalNotification = async (
 	title: string,
 	options?: NotificationOptions,
 ) => {
-	if (Notification.permission === "granted") {
-		// Instead of alert, we'll return the notification object
-		// The calling component should use the global notification system
-		return new Notification(title, {
-			icon: "/assets/img/icon-192x192.png",
-			badge: "/assets/img/icon-192x192.png",
-			...options,
-		});
+	if (Notification.permission === "granted" && "serviceWorker" in navigator) {
+		try {
+			const registration = await navigator.serviceWorker.ready;
+			return registration.showNotification(title, {
+				icon: "/assets/img/icon-192x192.png",
+				badge: "/assets/img/icon-192x192.png",
+				tag: "mahsa-alert-notification",
+				...options,
+			});
+		} catch (error) {
+			console.error("Error showing notification via service worker:", error);
+			return null;
+		}
 	}
 	return null;
 };
