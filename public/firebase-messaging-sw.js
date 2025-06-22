@@ -49,11 +49,6 @@ try {
 			data: payload.data || {},
 		};
 
-		console.log(
-			"Showing notification:",
-			notificationTitle,
-			notificationOptions,
-		);
 		return self.registration.showNotification(
 			notificationTitle,
 			notificationOptions,

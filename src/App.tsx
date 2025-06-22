@@ -81,6 +81,10 @@ function App() {
 					console.log("Notification clicked:", payload);
 				},
 			};
+			// check if the notification is already in the list
+			if (notifications.some((n) => n.id === notification.id)) {
+				return;
+			}
 			showNotification({
 				title: notification.title,
 				message: notification.body ?? "",
