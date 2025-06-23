@@ -7,6 +7,7 @@ import { NotificationProvider } from "./components/NotificationContext";
 // Import the generated route tree
 import { routeTree } from "./routeTree.gen";
 import { registerFirebaseMessagingSW } from "./utils/serviceWorker";
+import { AuthProvider, useAuth } from "./components/admin/auth";
 
 // Register Firebase messaging service worker
 if (import.meta.env.PROD) {
@@ -34,11 +35,19 @@ declare module "@tanstack/react-router" {
 const rootElement = document.getElementById("root")!;
 if (!rootElement.innerHTML) {
 	const root = ReactDOM.createRoot(rootElement);
+
 	root.render(
 		<StrictMode>
 			<NotificationProvider>
-				<RouterProvider router={router} />
+				<AuthProvider>
+					<InnerApp />
+				</AuthProvider>
 			</NotificationProvider>
-		</StrictMode>,
+		</StrictMode>
 	);
 }
+
+function InnerApp() {
+	const auth = useAuth()
+	return <RouterProvider router={router} context={{ auth }} />
+  }
