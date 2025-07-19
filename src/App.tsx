@@ -1,23 +1,28 @@
 import { doc, setDoc } from "firebase/firestore";
-import { onMessage } from "firebase/messaging";
 import { useCallback, useEffect, useState } from "react";
 import { db } from "@/firebase";
 import EvacSlider from "./components/EvacSlider";
+import { GlobalNotificationManager } from "./components/GlobalNotificationManager";
 import Header from "./components/Header";
 import LayerFilter from "./components/LayerFilter";
 import Layout from "./components/Layout";
 import LocateButton from "./components/LocateButton";
 import LocationTooltip from "./components/LocationTooltip";
 import MapComponent from "./components/MapComponent";
+import { useNotification } from "./components/NotificationContext";
+import { NotificationPermission } from "./components/NotificationPermission";
+import { OfflineIndicator } from "./components/OfflineIndicator";
 import ProximityAlert from "./components/ProximityAlert";
+import { PWAInstallPrompt } from "./components/PWAInstallPrompt";
 import ThemeToggle from "./components/ThemeToggle";
-import { messaging } from "./firebase";
+import { messaging, onMessage } from "./firebase";
 import { BordersProvider } from "./map-entities/borders/borders.context";
 import { LayersProvider } from "./map-entities/layers/layers.context";
 import { UserLocationProvider } from "./map-entities/user-location/user-location.context";
 import type { LocationProperties } from "./types";
 import { ThemeProvider } from "./ui/theme-provider";
 import { requestNotificationPermission } from "./utils/notifications";
+import { registerFirebaseMessagingSW } from "./utils/serviceWorker";
 
 interface TooltipState {
 	location: LocationProperties;
@@ -25,16 +30,33 @@ interface TooltipState {
 	y: number;
 }
 
+interface Notification {
+	id: string;
+	title: string;
+	body?: string;
+	onClick?: () => void;
+}
+
 type ZoomToBounds = [[number, number], [number, number]];
 
 function App() {
 	const [tooltipState, setTooltipState] = useState<TooltipState | null>(null);
 	const [zoomToBounds, setZoomToBounds] = useState<ZoomToBounds | null>(null);
+	const [notifications, setNotifications] = useState<Notification[]>([]);
+	const { showNotification } = useNotification();
 
 	useEffect(() => {
-		requestNotificationPermission().then(async (token) => {
+		// Register Firebase messaging service worker first
+		registerFirebaseMessagingSW().then(async (swRegistration) => {
+			if (!swRegistration) {
+				console.error("Failed to register Firebase messaging service worker");
+				return;
+			}
+
+			// Then request notification permission and get token
+			const token = await requestNotificationPermission();
 			if (!token) return;
-			console.log("is this the token", token);
+
 			await setDoc(doc(db, "tokens", token), {
 				token,
 				createdAt: new Date(),
@@ -49,8 +71,71 @@ function App() {
 
 		onMessage(messaging, (payload) => {
 			console.log("Message received in foreground:", payload);
-			alert(payload.notification?.title);
+
+			const notification: Notification = {
+				id: Date.now().toString(),
+				title: payload.notification?.title || "New Alert",
+				body: payload.notification?.body,
+				onClick: () => {
+					// TODO: Handle notification click - could navigate to specific area or show details
+					console.log("Notification clicked:", payload);
+				},
+			};
+			// check if the notification is already in the list
+			if (notifications.some((n) => n.id === notification.id)) {
+				return;
+			}
+			showNotification({
+				title: notification.title,
+				message: notification.body ?? "",
+			});
+
+			setNotifications((prev) => [...prev, notification]);
 		});
+	}, []);
+
+	const removeNotification = useCallback((id: string) => {
+		setNotifications((prev) => {
+			const newNotifications = prev.filter(
+				(notification) => notification.id !== id,
+			);
+			return newNotifications;
+		});
+	}, []);
+
+	const handleNotificationPermissionGranted = useCallback(async () => {
+		try {
+			console.log("=== Starting notification setup ===");
+
+			// Register Firebase messaging service worker first
+			const swRegistration = await registerFirebaseMessagingSW();
+			if (!swRegistration) {
+				console.error("Failed to register Firebase messaging service worker");
+				return;
+			}
+
+			const token = await requestNotificationPermission();
+			if (token) {
+				console.log("Notification permission granted, token:", token);
+				await setDoc(doc(db, "tokens", token), {
+					token,
+					createdAt: new Date(),
+					browser: {
+						userAgent: navigator.userAgent,
+						platform: navigator.platform,
+						language: navigator.language,
+						vendor: navigator.vendor,
+					},
+				});
+			} else {
+				console.error("Failed to get notification token");
+			}
+		} catch (error) {
+			console.error(
+				"Error setting up notifications after permission granted:",
+				error,
+			);
+		}
 	}, []);
 
 	const handleLocationHover = useCallback(
@@ -103,11 +188,6 @@ function App() {
 					<LayersProvider>
 						<BordersProvider>
 							<div className="h-full w-full">
-								{/* <IranBorderMap
-									onLocationHover={handleLocationHover}
-									onMouseMove={handleMouseMove}
-									zoomToBounds={zoomToBounds}
-								/> */}
 								<MapComponent
 									onLocationHover={handleLocationHover}
 									onMouseMove={handleMouseMove}
@@ -126,6 +206,18 @@ function App() {
 								tooltipState={tooltipState}
 								onClose={() => setTooltipState(null)}
 							/>
+
+							{/* PWA Components */}
+							<OfflineIndicator />
+							<PWAInstallPrompt />
+
+							{/* Notification Permission Prompt */}
+							<NotificationPermission
+								onPermissionGranted={handleNotificationPermissionGranted}
+							/>
+
+							{/* Global Notification Manager */}
+							<GlobalNotificationManager />
 						</BordersProvider>
 					</LayersProvider>
 				</UserLocationProvider>
